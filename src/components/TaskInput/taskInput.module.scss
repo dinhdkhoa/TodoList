@@ -27,3 +27,11 @@ button {
   padding: 0;
   border-width: 1px;
 }
+
+button:hover {
+  cursor: pointer;
+}
+
+button:active {
+  background-color: green;
+}
