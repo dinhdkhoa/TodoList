@@ -7,12 +7,25 @@ export interface Todo {
   name: string
   done: boolean
   id: string
+  isEditing?: boolean
 }
 
 function TodoList() {
   const [todos, setTodos] = useState<Todo[]>([])
 
-  const addTodo = (name: string) => {
+  const editingItem = todos.find((todo) => todo.isEditing)
+
+  const addAndEditTodo = (name: string) => {
+    if(editingItem) {
+      setTodos(prev => {
+        return prev.map(todo => {
+          if(todo.id === editingItem.id) {
+            return { ...todo, name, isEditing: false }
+          }
+          return todo
+      })})
+      return
+    }
     const todo: Todo = {
       done: false,
       name,
@@ -32,15 +45,27 @@ function TodoList() {
     })
   }
 
+  const handleEdit= (id: string) => {
+    setTodos((prev) => {
+      return prev.map((todo) => {
+        if (todo.id === id) {
+          return { ...todo, isEditing: true }
+        }
+        return todo
+      })
+    })
+  }
+
+
   const unfinished = todos.filter((todo) => !todo.done)
   const finished = todos.filter((todo) => todo.done)
 
   return (
     <div className={styles.todoList}>
       <div className={styles.todoListContainer}>
-        <TaskInput addTodo={addTodo} />
-        <TaskList todos={unfinished} handleChecked={handleChecked} />
-        <TaskList done todos={finished} handleChecked={handleChecked} />
+        <TaskInput addTodo={addAndEditTodo} editingItem={editingItem}/>
+        <TaskList todos={unfinished} handleChecked={handleChecked} onEdit={handleEdit}/>
+        <TaskList done todos={finished} handleChecked={handleChecked}  onEdit={handleEdit} />
       </div>
     </div>
   )
