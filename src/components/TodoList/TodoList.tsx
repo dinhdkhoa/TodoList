@@ -45,7 +45,7 @@ function TodoList() {
     })
   }
 
-  const handleEdit= (id: string) => {
+  const handleEditBtnClick= (id: string) => {
     setTodos((prev) => {
       return prev.map((todo) => {
         if (todo.id === id) {
@@ -63,9 +63,9 @@ function TodoList() {
   return (
     <div className={styles.todoList}>
       <div className={styles.todoListContainer}>
-        <TaskInput addTodo={addAndEditTodo} editingItem={editingItem}/>
-        <TaskList todos={unfinished} handleChecked={handleChecked} onEdit={handleEdit}/>
-        <TaskList done todos={finished} handleChecked={handleChecked}  onEdit={handleEdit} />
+        <TaskInput addTodo={addAndEditTodo} key={editingItem?.id} editingItem={editingItem}/>
+        <TaskList todos={unfinished} handleChecked={handleChecked} onEdit={handleEditBtnClick}/>
+        <TaskList done todos={finished} handleChecked={handleChecked}  onEdit={handleEditBtnClick} />
       </div>
     </div>
   )
