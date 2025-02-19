@@ -1,0 +1,44 @@
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "client/**"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "client/**"
+
+jobs:
+  build:
+    runs-on: self-hosted
+    defaults:
+      run:
+        working-directory: ./client/
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          cache-dependency-path: client/package-lock.json
+          node-version: 20.18.0
+          cache: 'npm'
+      - name: Create .env file
+        run: echo "${{ secrets.ENV_PRODUCTION_FE }}" > .env
+      - name: Install dependencies
+        run: npm i -f
+      - name: Build
+        run: npm run build
+
+  deploy:
+    runs-on: self-hosted
+    defaults:
+      run:
+        working-directory: ./client/
+    needs: build
+    steps:
+      - name: Apply Change
+        run: rsync -avzc --delete . ~/client/
+      - name: Deploy
+        run: pm2 restart NextJs

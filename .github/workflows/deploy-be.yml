@@ -1,0 +1,46 @@
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "server/**"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "server/**"
+
+jobs:
+  build:
+    runs-on: self-hosted
+    defaults:
+      run:
+        working-directory: ./server/
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          cache-dependency-path: server/package-lock.json
+          node-version: 20.18.0
+          cache: 'npm'
+      - name: Create .env file
+        run: echo "${{ secrets.ENV_PRODUCTION_BE }}" > .env
+      - name: Install dependencies
+        run: npm i -f
+      - name: Gen DB
+        run: npx prisma generate
+      - name: Build
+        run: npm run build
+
+  deploy:
+    runs-on: self-hosted
+    defaults:
+      run:
+        working-directory: ./server/
+    needs: build
+    steps:
+      - name: Apply Change
+        run: rsync -avzc --delete . ~/server/
+      - name: Deploy
+        run: pm2 restart Fastify
